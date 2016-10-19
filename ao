@@ -2,7 +2,8 @@
 runmode : 0;
 input : n(5, 1, 233, 1), m(34, 1, 233, 1);
 i := barpos;
-if i >= m + 1 then begin
+if i >= m + 1 then 
+begin
 	sumn := 0; summ := 0;
 	for j = 0 to n - 1 do begin 
 		sumn := sumn + (h[i - j] + l[i - j]) / 2;
