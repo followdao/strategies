@@ -1,0 +1,22 @@
+{ao}
+runmode : 0;
+input : n(5, 1, 233, 1), m(34, 1, 233, 1);
+i := barpos;
+if i >= m + 1 then begin
+	sumn := 0; summ := 0;
+	for j = 0 to n - 1 do begin 
+		sumn := sumn + (h[i - j] + l[i - j]) / 2;
+	end
+	sumn := sumn / n;
+	for k = 0 to m - 1 do begin 
+		summ := summ + (h[i - k] + l[i - k]) / 2;
+	end	
+	summ := summ / m;
+	ao := sumn - summ;
+end
+动量 : ao;
+hon : ao[i] >= ao[i - 1], linethick0; lan : ao[i] < ao[i - 1], linethick0;
+duo : ao[i] > 0, linethick0; kon : ao[i] < 0, linethick0;
+stickline(hon, 0, ao, 0.8, 1, colorred);
+stickline(lan, 0, ao, 0.8, 1, colorblue);
+zero : 0, colorgreen;
