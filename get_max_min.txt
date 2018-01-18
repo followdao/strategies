@@ -1,0 +1,129 @@
+// 输出: 数值型
+//------------------------------------------------------------------------
+Params
+	NumericSeries Prices;										//定义要求的变量值  s == Sequence
+	Numeric Lens(10);											//定义计算的周期数
+	Numeric N(5);														//定义计算的周期数
+	Numeric IsMax(1);												//为计算类型参数，1 - 求最大，0 - 求最小；
+	NumericRef IndexBar;							//引用参数，返回极值出现的回溯周期索引
+Vars
+	Numeric nMaxBar;												//第N大值出现的回溯周期索引值
+	Numeric NthMaxValue;									//求极大值
+	Numeric nMinBar;												//第N小值出现的回溯周期索引值
+	Numeric NthMinValue;									//第求极小值
+	Numeric TmpValue;											//中间变量
+	Numeric NthReturnValue;								//定义变量
+	Numeric nBetterCnt;											//中间变量
+	Numeric nEqualCnt;											//中间变量
+	Numeric nEqualIndex;										//中间变量
+	Numeric i;																//定义变量，用于For循环
+	Numeric j;																//定义变量，用于For循环
+	Numeric k;																//定义变量，用于For循环
+   Numeric Length1;
+Begin
+    Length1 = Lens - 1;
+	If (Lens > 0 && N > 0 && N <= Lens)//周期数大于零，并且N在Length范围内
+	{
+		NthMaxValue = Extremes(Prices, Lens, 1, nMaxBar);//求极大值
+		NthMinValue = Extremes(Prices, Lens, 0, nMinBar);//求极小值
+		
+		If(IsMax)//求最大值
+		{
+			For i = 2 To N//For循环语句
+			{
+				TmpValue = NthMinValue - 1;//最小值减去1
+				nBetterCnt = 0;//初始值为0
+				nEqualCnt = 0;//初始值为0
+				For j = 0 To Lens - 1//For循环语句
+				{
+					If ( Prices[j] > NthMaxValue)//大于极大值时
+					{
+						nBetterCnt = nBetterCnt + 1;//记录nBetterCnt
+					}Else If ( Prices[j] < NthMaxValue)//小于极大值时
+					{
+						If (Prices[j] > TmpValue)//大于中间变量TmpValue
+						{
+							TmpValue = Prices[j] ;//赋值给中间变量
+							nMaxBar = j;//第N大值出现的回溯周期索引值
+						}
+					}Else
+					{
+						nEqualCnt = nEqualCnt + 1;//记录nEqualCnt
+					}
+				}
+					
+				If (nBetterCnt + nEqualCnt >= i)
+				{
+					nEqualIndex = 0;
+					For  k = 0 To  Length1//For循环语句
+					{
+						If (Prices[k] == NthMaxValue)
+						{
+							nEqualIndex = nEqualIndex + 1;
+							If (nEqualIndex == (i - nBetterCnt))
+							{
+								nMaxBar = k;
+							}
+						}
+					}
+				}Else
+				{
+					NthMaxValue = TmpValue;
+				}				
+			}
+			IndexBar = nMaxBar;//极值时的周期索引值
+			NthReturnValue = NthMaxValue;//第N大值
+		}Else
+		{
+			For i = 2 To N//For循环语句
+			{
+				TmpValue = NthMaxValue + 1;
+				nBetterCnt = 0;
+				nEqualCnt = 0;
+				For j = 0 To Length1//For循环语句
+				{
+					If ( Prices[j] < NthMinValue)
+					{
+						nBetterCnt = nBetterCnt + 1;
+					}Else If ( Prices[j] > NthMinValue)
+					{
+						If (Prices[j] < TmpValue)
+						{
+							TmpValue = Prices[j] ;
+							nMinBar = j;
+						}
+					}Else
+					{
+						nEqualCnt = nEqualCnt + 1;
+					}
+				}
+					
+				If (nBetterCnt + nEqualCnt >= i)
+				{
+					nEqualIndex = 0;
+					For  k = 0 To  Length1
+					{
+						If (Prices[k] == NthMinValue)
+						{
+							nEqualIndex = nEqualIndex + 1;
+							If (nEqualIndex == (i - nBetterCnt))
+							{
+								nMinBar = k;
+							}
+						}
+					}
+				}Else
+				{
+					NthMinValue = TmpValue;
+				}				
+			}
+			IndexBar = nMinBar;//极值时的索引值
+			NthReturnValue = NthMinValue;//第N小值
+		}
+	}Else
+	{
+		NthReturnValue = -1;//无效值
+		IndexBar = -1;//无效值
+	}
+	Return NthReturnValue;//函数返回值
+End
